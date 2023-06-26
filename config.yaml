@@ -1,0 +1,5 @@
+data-collection:
+  start_date: "01 january 2023"
+  status: TRADING
+  coin_pair: USDT
+  data_folder: data
