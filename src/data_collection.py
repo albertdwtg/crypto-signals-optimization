@@ -111,3 +111,29 @@ def collect_coins_data(start_date: str, coin_pair: str, coin_status: str, data_f
         print(key)
         save_df_to_parquet(value,data_folder_path, key)
     return historic
+
+def load_data(reload: bool, start_date: str, coin_pair: str, coin_status: str, data_folder_name: str)->dict:
+    """Function that reload files or just import existing files
+
+    Args:
+        reload (bool): tells if we reload or just import
+        start_date (str): date where to start the historic
+        coin_pair (str): pair of the coin we want to collect. ex: USDT
+        coin_status (str): status of the coin on api binance. ex: TRADING
+        data_folder_name (str): name of the folder wher we will save data
+    Returns:
+        dict: dict of dataframes containing data
+    """
+    historic_data = {}
+    if reload:
+        historic_data = collect_coins_data(start_date, coin_pair, coin_status, data_folder_name)
+    else:
+        root_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        data_folder_path = os.path.join(root_dir, data_folder_name)
+        files_dir = [f for f in os.listdir(data_folder_path) if f.endswith(".parquet")]
+        for file in files_dir:
+            complete_file_path = os.path.join(data_folder_path, file)
+            file_name = file.split('.')[0]
+            df=pd.read_parquet(complete_file_path)
+            historic_data[file_name] = df
+    return historic_data

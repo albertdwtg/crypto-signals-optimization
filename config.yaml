@@ -3,3 +3,9 @@ data-collection:
   status: TRADING
   coin_pair: USDT
   data_folder: data
+  reload: False
+
+signals_parameters:
+  default:
+    rsi:
+      window: 14
