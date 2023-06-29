@@ -1,11 +1,33 @@
 data-collection:
-  start_date: "01 january 2023"
+  start_date: "01 january 2019"
   status: TRADING
   coin_pair: USDT
   data_folder: data
   reload: False
 
+train_test_split_ratio: 0.8
+col_num_values_threshold: 0.4
+
 signals_parameters:
   default:
     rsi:
+      lag: 1
+      normalization_choice: 1
       window: 14
+
+signals_optimizations:
+  param_to_optimize: sharpe_ratio
+  commons:
+    lag:
+      min: 1
+      max: 8
+      step: 1
+    normalization_choice:
+      min: 1
+      max: 5
+      step: 1
+  rsi:
+    window:
+      min: 7
+      max: 25
+      step: 1

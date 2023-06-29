@@ -90,29 +90,55 @@ def save_df_to_parquet(df: pd.DataFrame, path: str, filename: str) -> str:
     return name
 
 def collect_coins_data(start_date: str, coin_pair: str, coin_status: str, data_folder_name: str) -> dict:
-    """Function that collects historical data of coins
+    """Function that collects historical data of coins and save it to parquet
 
     Args:
         start_date (str): date where to start the historic
         coin_pair (str): pair of the coin we want to collect. ex: USDT
         coin_status (str): status of the coin on api binance. ex: TRADING
-        data_folder_name (str): name of the folder wher we will save data
+        data_folder_name (str): name of the folder where we will save data
     Returns:
         dict: dict of dataframes containing data
     """
     root_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    print(root_dir)
     data_folder_path = os.path.join(root_dir, data_folder_name)
-    print(data_folder_path)
     coins_names = get_futures_symbols(coin_status, coin_pair)
     
     historic = collect_historic_data(coins_names, start_date)
     for key, value in historic.items():
-        print(key)
         save_df_to_parquet(value,data_folder_path, key)
     return historic
 
-def load_data(reload: bool, start_date: str, coin_pair: str, coin_status: str, data_folder_name: str)->dict:
+def remove_columns_with_null_values(df: pd.DataFrame, threshold: float = 0.5) -> pd.DataFrame:
+    """
+    Removes columns from a DataFrame that contain more than the threshold percentage of null values.
+
+    Args:
+        df (pd.DataFrame): The DataFrame to be processed.
+        threshold (float, optional): The threshold percentage of null values. Default is 0.5 (50%).
+
+    Returns:
+        pd.DataFrame: The modified DataFrame with removed columns.
+    """
+    # Calculate the number of rows in the DataFrame
+    num_rows = len(df)
+
+    # Calculate the maximum allowed null values per column
+    threshold_null_values = num_rows * threshold
+
+    # Remove columns with more than threshold_null_values null values
+    columns_to_remove = []
+    for column in df.columns:
+        num_null_values = df[column].isnull().sum()
+        if num_null_values > threshold_null_values:
+            columns_to_remove.append(column)
+
+    df = df.drop(columns_to_remove, axis=1)
+    return df
+
+
+def load_data(reload: bool, start_date: str, coin_pair: str, coin_status: str, 
+              data_folder_name: str, threshold: float = 0.5)->dict:
     """Function that reload files or just import existing files
 
     Args:
@@ -121,6 +147,7 @@ def load_data(reload: bool, start_date: str, coin_pair: str, coin_status: str, d
         coin_pair (str): pair of the coin we want to collect. ex: USDT
         coin_status (str): status of the coin on api binance. ex: TRADING
         data_folder_name (str): name of the folder wher we will save data
+        threshold (float, optional): The threshold percentage of null values. Default is 0.5 (50%).
     Returns:
         dict: dict of dataframes containing data
     """
@@ -134,6 +161,8 @@ def load_data(reload: bool, start_date: str, coin_pair: str, coin_status: str, d
         for file in files_dir:
             complete_file_path = os.path.join(data_folder_path, file)
             file_name = file.split('.')[0]
-            df=pd.read_parquet(complete_file_path)
+            df = pd.read_parquet(complete_file_path)
             historic_data[file_name] = df
+    for key in historic_data:
+        historic_data[key] = remove_columns_with_null_values(historic_data[key], threshold)
     return historic_data
