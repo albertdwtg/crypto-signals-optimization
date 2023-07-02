@@ -35,6 +35,14 @@ def train_test_split(historic_data: dict, train_ratio: float) -> Tuple[dict,dict
 
 #-- Momentum Indicators
 def get_rsi(df_records:dict, lag:int = 1, normalization_choice:int = 1, **params):
+    """
+    Function that creates the rsi dataframe
+    :param df_records: all dataframes containing historical_data
+    :param lag: delay to add between signal and returns (minimum 1)
+    :param normalization_choice: what normalizations we want to proceed
+    :param params: dict of parameters to create the signal
+    :return: dataframe containing the signal
+    """
     signal_df=pd.DataFrame()
     for coin_pair in df_records["Open"].columns:
         coin_name=coin_pair.split("-")[0]
@@ -43,6 +51,13 @@ def get_rsi(df_records:dict, lag:int = 1, normalization_choice:int = 1, **params
     return signal_df.shift(lag)
 
 def compute_signal(signal_name: str, historic_data: dict, **params) -> pd.DataFrame:
+    """
+    Function that create a signal, based on its name
+    :param signal_name: name of the signal we want to create
+    :param historic_data: all dataframes containing historical data
+    :param params: dict of parameters to create the signal
+    :return: dataframe of the signal
+    """
     lag = 1
     if "lag" in params:
         lag = params["lag"]
@@ -58,4 +73,4 @@ def compute_signal(signal_name: str, historic_data: dict, **params) -> pd.DataFr
         signal = get_rsi(historic_data, lag, normalization_choice, **params)
     
     signal_weighted = convert_to_weights(signal)
-    return signal
+    return signal_weighted

@@ -16,6 +16,8 @@ signals_parameters:
       window: 14
 
 signals_optimizations:
+  optuna_study_direction: maximize
+  n_trials: 3
   param_to_optimize: sharpe_ratio
   commons:
     lag:
@@ -28,6 +30,9 @@ signals_optimizations:
       step: 1
   rsi:
     window:
-      min: 7
+      type: int
+      min: 5
       max: 25
       step: 1
+
+

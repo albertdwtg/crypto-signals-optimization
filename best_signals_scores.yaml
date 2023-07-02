@@ -1,0 +1,6 @@
+rsi:
+  annual_benefit: '-0.0729'
+  daily_benefit: '-0.0002'
+  daily_pnl: '-0.0'
+  daily_turnover: '0.2784'
+  sharpe_ratio: '-0.0082'

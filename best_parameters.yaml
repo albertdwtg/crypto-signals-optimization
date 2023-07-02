@@ -1,0 +1,4 @@
+rsi:
+  lag: 4
+  normalization_choice: 4
+  window: 9
