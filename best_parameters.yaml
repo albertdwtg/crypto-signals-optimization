@@ -1,4 +1,98 @@
-rsi:
-  lag: 4
+awesome_oscillator:
+  lag: 3
   normalization_choice: 4
-  window: 9
+  window1: 1
+  window2: 25
+kama:
+  lag: 2
+  normalization_choice: 4
+  pow1: 6
+  pow2: 21
+  window: 6
+macd_diff:
+  lag: 3
+  normalization_choice: 5
+  window_fast: 18
+  window_sign: 7
+  window_slow: 20
+macd_signal:
+  lag: 3
+  normalization_choice: 3
+  window_fast: 12
+  window_sign: 4
+  window_slow: 22
+ppo:
+  lag: 2
+  normalization_choice: 2
+  window_fast: 12
+  window_sign: 8
+  window_slow: 20
+ppo_signal:
+  lag: 1
+  normalization_choice: 2
+  window_fast: 12
+  window_sign: 7
+  window_slow: 20
+pvo:
+  lag: 3
+  normalization_choice: 2
+  window_fast: 12
+  window_sign: 7
+  window_slow: 27
+pvo_hist:
+  lag: 3
+  normalization_choice: 1
+  window_fast: 17
+  window_sign: 4
+  window_slow: 28
+pvo_signal:
+  lag: 1
+  normalization_choice: 2
+  window_fast: 14
+  window_sign: 7
+  window_slow: 30
+roc:
+  lag: 2
+  normalization_choice: 3
+  window: 13
+rsi:
+  lag: 3
+  normalization_choice: 4
+  window: 6
+stoch_oscillator:
+  lag: 4
+  normalization_choice: 3
+  smooth_window: 8
+  window: 20
+stoch_oscillator_signal:
+  lag: 1
+  normalization_choice: 2
+  smooth_window: 4
+  window: 16
+stoch_rsi:
+  lag: 4
+  normalization_choice: 1
+  smooth1: 2
+  smooth2: 6
+  window: 8
+stoch_rsi_d:
+  lag: 3
+  normalization_choice: 1
+  smooth1: 3
+  smooth2: 1
+  window: 7
+stoch_rsi_k:
+  lag: 1
+  normalization_choice: 1
+  smooth1: 1
+  smooth2: 2
+  window: 11
+tsi:
+  lag: 2
+  normalization_choice: 2
+  window_fast: 8
+  window_slow: 20
+williams_r:
+  lag: 4
+  lbp: 16
+  normalization_choice: 5

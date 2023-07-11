@@ -16,6 +16,9 @@ n_trials = optim_parameters["n_trials"]
 optuna_study_direction = optim_parameters["optuna_study_direction"]
 train_data = settings.train_data
 returns = settings.returns
+SIGNAL_SCORES_FILENAME = "best_signals_scores.yaml"
+SIGNAL_PARAMETERS_FILENAME = "best_parameters.yaml"
+OPTUNA_EARLY_STOPPING = optim_parameters["n_trials_before_callback"]
 
 def params_to_optimize_with_trial(trial, signal_name:str):
     """
@@ -70,6 +73,7 @@ def objective(trial) -> Union[float, int]:
     metrics = compute_metrics(signal, returns)
     return metrics[metric_to_optimize]
 
+
 def optimize_signal(signal_name: str) -> optuna.study.study.Study:
     """
     Function that optimizes a signal based on its name
@@ -79,15 +83,21 @@ def optimize_signal(signal_name: str) -> optuna.study.study.Study:
     global signal_name_to_optimize
     signal_name_to_optimize = signal_name
     study = optuna.create_study(direction = optuna_study_direction)
-    study.optimize(objective, n_trials = n_trials)
+    try:
+        study.optimize(objective, n_trials = n_trials, callbacks=[early_stopping_opt])
+    except EarlyStoppingExceeded:
+        print(f'EarlyStopping Exceeded: No new best scores on iters {OPTUNA_EARLY_STOPPING}')
 
     signal = compute_signal(signal_name_to_optimize, train_data, **study.best_params)
     metrics = compute_metrics(signal, returns)
 
-    save_parameters(signal_name, study.best_params)
-    save_scores(signal_name, metrics)
+    improvement = check_if_improvement(signal_name, metrics)
+    if improvement:
+        save_parameters(signal_name, study.best_params)
+        save_scores(signal_name, metrics)
 
     return study
+
 
 def save_parameters(signal_name: str, dict_of_parameters: dict):
     """
@@ -96,12 +106,13 @@ def save_parameters(signal_name: str, dict_of_parameters: dict):
     :param dict_of_parameters: best parameters of the signal
     :return: None
     """
-    best_parameters_file = yaml_to_dict("best_parameters.yaml")
+    best_parameters_file = yaml_to_dict(SIGNAL_PARAMETERS_FILENAME)
     if signal_name not in best_parameters_file:
         best_parameters_file[signal_name] = {}
     best_parameters_file[signal_name] = dict_of_parameters
-    with open('best_parameters.yaml', 'w') as outfile:
+    with open(SIGNAL_PARAMETERS_FILENAME, 'w') as outfile:
         yaml.safe_dump(best_parameters_file, outfile, default_flow_style=False)
+
 
 def save_scores(signal_name: str, dict_of_metrics: dict):
     """
@@ -110,7 +121,7 @@ def save_scores(signal_name: str, dict_of_metrics: dict):
     :param dict_of_metrics: metrics of the signal like sharpe ratio or daily pnl
     :return: None
     """
-    best_scores_file = yaml_to_dict("best_signals_scores.yaml")
+    best_scores_file = yaml_to_dict(SIGNAL_SCORES_FILENAME)
     if signal_name not in best_scores_file:
         best_scores_file[signal_name] = {}
     if "pnl_series" in dict_of_metrics:
@@ -121,5 +132,61 @@ def save_scores(signal_name: str, dict_of_metrics: dict):
                                                 else v for k, v in
                                                 dict_of_metrics.items()}
 
-    with open('best_signals_scores.yaml', 'w') as outfile:
+    with open(SIGNAL_SCORES_FILENAME, 'w') as outfile:
         yaml.dump(best_scores_file, outfile, default_flow_style=False)
+
+
+def check_if_improvement(signal_name: str, dict_of_metrics: dict) -> bool:
+    """
+    Return true if there is an improvement of the metric studied
+    :param signal_name: name of the signal evaluated
+    :param dict_of_metrics: metrics of the current study
+    :return: True if there is an improvement
+    """
+    best_scores_file = yaml_to_dict(SIGNAL_SCORES_FILENAME)
+    improvement = False
+    if signal_name in best_scores_file:
+        previous_scores = best_scores_file[signal_name]
+        if ((dict_of_metrics[metric_to_optimize] > float(previous_scores[metric_to_optimize]))
+            and (optuna_study_direction.lower() == "maximize")):
+            improvement = True
+        if ((dict_of_metrics[metric_to_optimize] < float(previous_scores[metric_to_optimize]))
+            and (optuna_study_direction.lower() == "minimize")):
+            improvement = True
+    else:
+        improvement = True
+    return improvement
+
+
+class EarlyStoppingExceeded(optuna.exceptions.OptunaError):
+    early_stop = OPTUNA_EARLY_STOPPING
+    early_stop_count = 0
+    best_score = None
+
+
+def early_stopping_opt(study, trial):
+    """
+    Function that raises an error if callback is triggered
+    :param study: optuna study
+    :param trial: optuna trial
+    :return: None
+    """
+    if EarlyStoppingExceeded.best_score == None:
+        EarlyStoppingExceeded.best_score = study.best_value
+
+    if (study.best_value > EarlyStoppingExceeded.best_score
+            and optuna_study_direction.lower() == "maximize") or \
+            (study.best_value < EarlyStoppingExceeded.best_score
+            and optuna_study_direction.lower() == "minimize"):
+        EarlyStoppingExceeded.best_score = study.best_value
+        EarlyStoppingExceeded.early_stop_count = 0
+    else:
+        if EarlyStoppingExceeded.early_stop_count > EarlyStoppingExceeded.early_stop:
+            EarlyStoppingExceeded.early_stop_count = 0
+            best_score = None
+            raise EarlyStoppingExceeded()
+        else:
+            EarlyStoppingExceeded.early_stop_count = EarlyStoppingExceeded.early_stop_count+1
+    print(f'EarlyStop counter: {EarlyStoppingExceeded.early_stop_count}, Best score: {study.best_value}')
+    return
+
