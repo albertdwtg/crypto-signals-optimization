@@ -16,4 +16,4 @@ from src.normalizations import convert_to_weights
 from src.visualisation import plot_pnl
 from src.signals_optimization import optimize_signal
 
-study = optimize_signal("adx")
+study = optimize_signal("money_flow_index")

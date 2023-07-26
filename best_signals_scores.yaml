@@ -1,9 +1,57 @@
+aroon_down:
+  annual_benefit: '-0.003'
+  daily_benefit: '-0.0'
+  daily_pnl: '0.0004'
+  daily_turnover: '0.5824'
+  sharpe_ratio: '0.5031'
+aroon_up:
+  annual_benefit: '0.2702'
+  daily_benefit: '0.0007'
+  daily_pnl: '0.001'
+  daily_turnover: '0.3089'
+  sharpe_ratio: '1.4221'
 awesome_oscillator:
   annual_benefit: '0.1526'
   daily_benefit: '0.0004'
   daily_pnl: '0.0006'
   daily_turnover: '0.2521'
   sharpe_ratio: '0.8053'
+bol_wband:
+  annual_benefit: '0.3469'
+  daily_benefit: '0.001'
+  daily_pnl: '0.001'
+  daily_turnover: '0.1054'
+  sharpe_ratio: '1.3809'
+cci:
+  annual_benefit: '0.4849'
+  daily_benefit: '0.0013'
+  daily_pnl: '0.0016'
+  daily_turnover: '0.3357'
+  sharpe_ratio: '2.4882'
+chaikin_money_flow:
+  annual_benefit: '0.3378'
+  daily_benefit: '0.0009'
+  daily_pnl: '0.0012'
+  daily_turnover: '0.3327'
+  sharpe_ratio: '2.2262'
+dpo:
+  annual_benefit: '0.1657'
+  daily_benefit: '0.0005'
+  daily_pnl: '0.001'
+  daily_turnover: '0.7816'
+  sharpe_ratio: '1.3109'
+ease_of_movement:
+  annual_benefit: '0.0644'
+  daily_benefit: '0.0002'
+  daily_pnl: '0.0011'
+  daily_turnover: '1.2821'
+  sharpe_ratio: '0.9913'
+force_index:
+  annual_benefit: '0.4157'
+  daily_benefit: '0.0011'
+  daily_pnl: '0.0013'
+  daily_turnover: '0.2485'
+  sharpe_ratio: '1.3511'
 kama:
   annual_benefit: '-0.2635'
   daily_benefit: '-0.0007'
@@ -22,6 +70,18 @@ macd_signal:
   daily_pnl: '0.0004'
   daily_turnover: '0.1211'
   sharpe_ratio: '0.4295'
+mass_index:
+  annual_benefit: '0.3461'
+  daily_benefit: '0.0009'
+  daily_pnl: '0.0011'
+  daily_turnover: '0.2713'
+  sharpe_ratio: '1.4433'
+money_flow_index:
+  annual_benefit: '0.2718'
+  daily_benefit: '0.0007'
+  daily_pnl: '0.001'
+  daily_turnover: '0.3008'
+  sharpe_ratio: '1.428'
 ppo:
   annual_benefit: '0.3944'
   daily_benefit: '0.0011'
@@ -94,6 +154,12 @@ stoch_rsi_k:
   daily_pnl: '0.0015'
   daily_turnover: '0.6283'
   sharpe_ratio: '2.1123'
+trix:
+  annual_benefit: '0.443'
+  daily_benefit: '0.0012'
+  daily_pnl: '0.0014'
+  daily_turnover: '0.2339'
+  sharpe_ratio: '1.5102'
 tsi:
   annual_benefit: '0.4252'
   daily_benefit: '0.0012'

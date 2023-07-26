@@ -1,8 +1,42 @@
+aroon_down:
+  lag: 5
+  normalization_choice: 3
+  window: 10
+aroon_up:
+  lag: 1
+  normalization_choice: 3
+  window: 27
 awesome_oscillator:
   lag: 3
   normalization_choice: 4
   window1: 1
   window2: 25
+bol_wband:
+  lag: 2
+  normalization_choice: 3
+  window: 30
+  window_dev: 5
+cci:
+  constant: 0.019
+  lag: 2
+  normalization_choice: 5
+  window: 24
+chaikin_money_flow:
+  lag: 4
+  normalization_choice: 1
+  window: 16
+dpo:
+  lag: 4
+  normalization_choice: 3
+  window: 16
+ease_of_movement:
+  lag: 6
+  normalization_choice: 3
+  window: 5
+force_index:
+  lag: 3
+  normalization_choice: 1
+  window: 19
 kama:
   lag: 2
   normalization_choice: 4
@@ -21,6 +55,15 @@ macd_signal:
   window_fast: 12
   window_sign: 4
   window_slow: 22
+mass_index:
+  lag: 2
+  normalization_choice: 2
+  window_fast: 3
+  window_slow: 30
+money_flow_index:
+  lag: 3
+  normalization_choice: 2
+  window: 17
 ppo:
   lag: 2
   normalization_choice: 2
@@ -87,6 +130,10 @@ stoch_rsi_k:
   smooth1: 1
   smooth2: 2
   window: 11
+trix:
+  lag: 2
+  normalization_choice: 4
+  window: 5
 tsi:
   lag: 2
   normalization_choice: 2

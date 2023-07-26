@@ -267,5 +267,85 @@ signals_optimizations:
       min: 4
       max: 9
       step: 1
-
+  aroon_up:
+    window:
+      type: int
+      min: 10
+      max: 30
+      step: 1
+  aroon_down:
+    window:
+      type: int
+      min: 10
+      max: 30
+      step: 1
+  cci:
+    window:
+      type: int
+      min: 10
+      max: 30
+      step: 1
+    constant:
+      type: float
+      min: 0.005
+      max: 0.030
+      step: 0.002
+  dpo:
+    window:
+      type: int
+      min: 10
+      max: 30
+      step: 1
+  trix:
+    window:
+      type: int
+      min: 5
+      max: 25
+      step: 1
+  mass_index:
+    window_fast:
+      type: int
+      min: 3
+      max: 15
+      step: 1
+    window_slow:
+      type: int
+      min: 18
+      max: 35
+      step: 1
+  bol_wband:
+    window:
+      type: int
+      min: 12
+      max: 30
+      step: 1
+    window_dev:
+      type: int
+      min: 2
+      max: 5
+      step: 1
+  chaikin_money_flow:
+    window:
+      type: int
+      min: 12
+      max: 30
+      step: 1
+  ease_of_movement:
+    window:
+      type: int
+      min: 5
+      max: 21
+      step: 1
+  force_index:
+    window:
+      type: int
+      min: 5
+      max: 21
+      step: 1
+  money_flow_index:
+    window:
+      type: int
+      min: 5
+      max: 21
+      step: 1
 

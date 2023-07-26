@@ -41,10 +41,10 @@ def params_to_optimize_with_trial(trial, signal_name:str):
                 )
         if signal_parameters[param]["type"] == "float":
             trial_param = trial.suggest_float(
-                param,
-                signal_parameters[param]["min"],
-                signal_parameters[param]["max"],
-                signal_parameters[param]["step"]
+                name = param,
+                low = signal_parameters[param]["min"],
+                high = signal_parameters[param]["max"],
+                step = signal_parameters[param]["step"]
                 )
         all_trial_params[param] = trial_param
     return all_trial_params, trial
