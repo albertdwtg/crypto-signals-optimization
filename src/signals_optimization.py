@@ -6,6 +6,10 @@ import src.settings as settings
 from typing import Union
 import yaml
 from src.settings import yaml_to_dict
+from src import logging_config
+import logging
+
+logger = logging.getLogger(__name__)
 
 config_values = settings.config_values
 optim_parameters = config_values["signals_optimizations"]
@@ -18,6 +22,7 @@ train_data = settings.train_data
 returns = settings.returns
 SIGNAL_SCORES_FILENAME = "best_signals_scores.yaml"
 SIGNAL_PARAMETERS_FILENAME = "best_parameters.yaml"
+CONFIG_VALUES_FILENAME = "config.yaml"
 OPTUNA_EARLY_STOPPING = optim_parameters["n_trials_before_callback"]
 
 def params_to_optimize_with_trial(trial, signal_name:str):
@@ -81,6 +86,7 @@ def optimize_signal(signal_name: str) -> optuna.study.study.Study:
     :return: study of all trials
     """
     global signal_name_to_optimize
+    logging.info(f'Start optimization of {signal_name}')
     signal_name_to_optimize = signal_name
     study = optuna.create_study(direction = optuna_study_direction)
     try:
@@ -93,10 +99,24 @@ def optimize_signal(signal_name: str) -> optuna.study.study.Study:
 
     improvement = check_if_improvement(signal_name, metrics)
     if improvement:
+        logging.info(f'Signal {signal_name} has improved, saving to file')
         save_parameters(signal_name, study.best_params)
         save_scores(signal_name, metrics)
+    else:
+        logging.info(f"Signal {signal_name} hasn't improved")
 
     return study
+
+def optimize_all_signals():
+    """
+    Function that will optimize all signals written in config file
+    """
+    signals_settings = yaml_to_dict(CONFIG_VALUES_FILENAME)["signals_optimizations"]
+    keys_to_remove = ["optuna_study_direction", "n_trials", "n_trials_before_callback", 
+                      "param_to_optimize", "commons"]
+    [signals_settings.pop(key) for key in keys_to_remove if key in(signals_settings)]
+    for signal_name in signals_settings.keys():
+        optimize_signal(signal_name)
 
 
 def save_parameters(signal_name: str, dict_of_parameters: dict):
@@ -187,6 +207,6 @@ def early_stopping_opt(study, trial):
             raise EarlyStoppingExceeded()
         else:
             EarlyStoppingExceeded.early_stop_count = EarlyStoppingExceeded.early_stop_count+1
-    print(f'EarlyStop counter: {EarlyStoppingExceeded.early_stop_count}, Best score: {study.best_value}')
+    logging.info((f'EarlyStop counter: {EarlyStoppingExceeded.early_stop_count}, Best score: {study.best_value}'))
     return
 

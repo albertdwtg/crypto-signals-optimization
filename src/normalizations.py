@@ -115,7 +115,7 @@ def apply_normalizations(df: pd.DataFrame, normalization_choice: int) -> pd.Data
     Returns:
         pd.DataFrame: dataframe normalized
     """
-    if(normalization_choice==1) :
+    if(normalization_choice == 1) :
         df = normalize(df)
     elif(normalization_choice == 2):
         df = normalize2(df)
