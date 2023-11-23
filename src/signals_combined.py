@@ -44,8 +44,6 @@ def collect_all_signals() -> dict:
         all_signals[signal_name] = compute_signal(signal_name, train_data, **signals_parameters[signal_name])
     return all_signals
 
-#-- we keep the signals in the same order
-ALL_SIGNALS = dict(sorted(collect_all_signals().items()))
 
 def combination_of_signals(weights: dict, normalization_choice: int) -> pd.DataFrame:
     """Function that will combined all signals together with a certain weight
@@ -66,11 +64,12 @@ def combination_of_signals(weights: dict, normalization_choice: int) -> pd.DataF
             signal_df = ALL_SIGNALS[signal_name].copy()
             #-- creation of the dataframe on the first occurence
             if i == 0:
+                global signals_weighted
                 signals_weighted = weights[signal_name] * signal_df
             else:
                 signals_weighted = signals_weighted + weights[signal_name] * signal_df
     
-    signals_normalized = apply_normalizations(signal_df, normalization_choice)
+    signals_normalized = apply_normalizations(signals_weighted, normalization_choice)
     final_signal = convert_to_weights(signals_normalized)
     return final_signal
 
@@ -92,6 +91,25 @@ def objective(trial):
     signal = combination_of_signals(all_trial_params, normalization_choice)
     metrics = compute_metrics(signal, returns)
     return metrics[metric_to_optimize]
+
+def check_if_improvement(dict_of_metrics: dict) -> bool:
+    """
+    Return true if there is an improvement of the metric studied
+    :param dict_of_metrics: metrics of the current study
+    :return: True if there is an improvement
+    """
+    previous_scores = yaml_to_dict(SIGNAL_SCORES_FILENAME)
+    improvement = False
+    if previous_scores is not None:
+        if ((dict_of_metrics[metric_to_optimize] > float(previous_scores[metric_to_optimize]))
+            and (optuna_study_direction.lower() == "maximize")):
+            improvement = True
+        if ((dict_of_metrics[metric_to_optimize] < float(previous_scores[metric_to_optimize]))
+            and (optuna_study_direction.lower() == "minimize")):
+            improvement = True
+    else:
+        improvement = True
+    return improvement
 
 def save_scores(dict_of_metrics: dict):
     """
@@ -120,19 +138,31 @@ def save_parameters(dict_of_parameters: dict):
         yaml.safe_dump(dict_of_parameters, outfile, default_flow_style=False)
 
 def optimize_combined_signal():
+    global ALL_SIGNALS
+    
+    #-- we keep the signals in the same order
+    ALL_SIGNALS = dict(sorted(collect_all_signals().items()))
     study = optuna.create_study(direction = optuna_study_direction)
     try:
         study.optimize(objective, n_trials = N_TRIALS, callbacks=[early_stopping_opt])
     except EarlyStoppingExceeded:
         print(f'EarlyStopping Exceeded: No new best scores on iters {OPTUNA_EARLY_STOPPING}')
     
-    # normalization_choice = study.best_params["normalization_choice"]
-    # del study.best_params["normalization_choice"]
-    # signal = combination_of_signals(study.best_params, normalization_choice)
+    normalization_choice = study.best_params["normalization_choice"]
+    temp=study.best_params.copy()
+    best_params_dict = {k: round(v, 4) if isinstance(v, float)
+                                                else v for k, v in
+                                                temp.items()}
     
-    # metrics = compute_metrics(signal, returns)
-    # save_scores(metrics)
-    save_parameters(study.best_params)
+    del temp["normalization_choice"]
+    signal = combination_of_signals(temp, normalization_choice)
+    metrics = compute_metrics(signal, returns)
+    if check_if_improvement(metrics):
+        logging.info("Signal has improved")
+        save_scores(metrics)
+        save_parameters(best_params_dict)
+    else:
+        logging.info("Signal hasn't improved")
 
 
             

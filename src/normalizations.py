@@ -55,8 +55,11 @@ def normalize3(df: pd.DataFrame) -> pd.DataFrame:
         dataframe: normalized df
     """
     scaler = PowerTransformer(method="yeo-johnson")
-    temp=pd.DataFrame(scaler.fit_transform(df.T).T,columns=df.columns,index=df.index)
-    temp=temp.clip(-3, 3)
+    try :
+        temp=pd.DataFrame(scaler.fit_transform(df.T).T,columns=df.columns,index=df.index)
+        temp=temp.clip(-3, 3)
+    except Exception as e:
+        temp=normalize(df)
     return temp
 
 def normalize4(df: pd.DataFrame) -> pd.DataFrame:

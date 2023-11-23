@@ -9,7 +9,6 @@ from src.settings import yaml_to_dict
 from src import logging_config
 import logging
 
-
 logger = logging.getLogger(__name__)
 
 config_values = settings.config_values
