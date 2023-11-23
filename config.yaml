@@ -17,7 +17,7 @@ signals_parameters:
 
 signals_optimizations:
   optuna_study_direction: maximize
-  n_trials: 250
+  n_trials: 500
   n_trials_before_callback: 50
   param_to_optimize: sharpe_ratio
   commons:

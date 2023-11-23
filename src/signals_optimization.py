@@ -9,6 +9,7 @@ from src.settings import yaml_to_dict
 from src import logging_config
 import logging
 
+
 logger = logging.getLogger(__name__)
 
 config_values = settings.config_values
@@ -142,18 +143,24 @@ def save_scores(signal_name: str, dict_of_metrics: dict):
     :return: None
     """
     best_scores_file = yaml_to_dict(SIGNAL_SCORES_FILENAME)
+    
     if signal_name not in best_scores_file:
         best_scores_file[signal_name] = {}
+    
     if "pnl_series" in dict_of_metrics:
         del dict_of_metrics["pnl_series"]
+    
     if 'turnover_series' in dict_of_metrics:
         del dict_of_metrics["turnover_series"]
+    
     best_scores_file[signal_name] = {k: str(round(v, 4)) if isinstance(v, float)
                                                 else v for k, v in
                                                 dict_of_metrics.items()}
 
     with open(SIGNAL_SCORES_FILENAME, 'w') as outfile:
         yaml.dump(best_scores_file, outfile, default_flow_style=False)
+    
+    
 
 
 def check_if_improvement(signal_name: str, dict_of_metrics: dict) -> bool:
