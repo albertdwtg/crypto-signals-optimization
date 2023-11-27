@@ -3,7 +3,6 @@ settings.init()
 config_values = settings.config_values
 historical_data = settings.historical_data
 train_data = settings.train_data
-test_data = settings.test_data
 returns = settings.returns
 
 import yaml

@@ -30,8 +30,8 @@ def train_test_split(historic_data: dict, train_ratio: float) -> Tuple[dict,dict
     for key in historic_data:
         nb_rows = int(train_ratio * len(historic_data[key]))
         train_data[key] = historic_data[key][:nb_rows]
-        test_data[key] = historic_data[key][nb_rows:]
-    return train_data, test_data
+        #test_data[key] = historic_data[key][nb_rows:]
+    return train_data, historic_data
 
 #-- Momentum Indicators
 def get_rsi(df_records:dict, lag:int = 1, normalization_choice:int = 1, **params):

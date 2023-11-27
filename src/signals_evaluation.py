@@ -26,6 +26,7 @@ def get_pnl_series(signal: pd.DataFrame, returns: pd.DataFrame) -> pd.Series:
     Returns:
         pd.Series: pnl series obtained
     """
+    returns = returns.filter(items = list(signal.index), axis = 0)
     pnl = (signal * returns[signal.columns]).sum(axis=1)
     return pnl
 

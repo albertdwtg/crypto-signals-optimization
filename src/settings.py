@@ -34,5 +34,5 @@ def init():
                        config_values["data-collection"]["data_folder"],
                        config_values["col_num_values_threshold"])
 
-    train_data, test_data = train_test_split(historical_data, config_values["train_test_split_ratio"])
-    returns = get_returns_data(train_data)
+    train_data, historic_data = train_test_split(historical_data, config_values["train_test_split_ratio"])
+    returns = get_returns_data(historic_data)

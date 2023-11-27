@@ -19,7 +19,9 @@ optim_parameters = config_values["signals_optimizations"]
 metric_to_optimize = optim_parameters["param_to_optimize"]
 normalization_ranges = optim_parameters["commons"]["normalization_choice"]
 optuna_study_direction = optim_parameters["optuna_study_direction"]
+train_ratio = config_values["train_test_split_ratio"]
 train_data = settings.train_data
+historic_data = settings.historical_data
 returns = settings.returns
 SIGNAL_PARAMETERS_FILENAME = "best_parameters.yaml"
 SIGNAL_PARAMETERS_FILENAME_OUTPUT = "best_parameters_signal_combined.yaml"
@@ -29,6 +31,7 @@ N_TRIALS = optim_parameters["n_trials"]
 WEIGHT_MIN = 0.2
 WEIGHT_MAX = 1.0
 WEIGHT_STEP = 0.01
+    
 
 def collect_all_signals() -> dict:
     """
@@ -40,12 +43,18 @@ def collect_all_signals() -> dict:
     logging.info("Collection of all signals")
     signals_parameters = yaml_to_dict(SIGNAL_PARAMETERS_FILENAME)
     all_signals = {}
+    all_signals_train = {}
     for signal_name in signals_parameters.keys():
-        all_signals[signal_name] = compute_signal(signal_name, train_data, **signals_parameters[signal_name])
-    return all_signals
+        all_signals[signal_name] = compute_signal(signal_name, historic_data, **signals_parameters[signal_name])
+        nb_rows = int(train_ratio * len(all_signals[signal_name]))
+        all_signals_train[signal_name] = all_signals[signal_name][:nb_rows]
+    return all_signals, all_signals_train
 
+#-- we keep the signals in the same order
+ALL_SIGNALS_HISTORIC, ALL_SIGNALS_TRAIN = collect_all_signals()
+ALL_SIGNALS_TRAIN = dict(sorted(ALL_SIGNALS_TRAIN.items()))
 
-def combination_of_signals(weights: dict, normalization_choice: int) -> pd.DataFrame:
+def combination_of_signals(weights: dict, normalization_choice: int, config: str = "training") -> pd.DataFrame:
     """Function that will combined all signals together with a certain weight
 
     Args:
@@ -55,7 +64,12 @@ def combination_of_signals(weights: dict, normalization_choice: int) -> pd.DataF
     Returns:
         pd.DataFrame: signal built as a combination of signal
     """
-    signal_names = list(ALL_SIGNALS.keys())
+    if config.lower() == "training":
+        ALL_SIGNALS = ALL_SIGNALS_TRAIN
+    if config.lower() == "all":
+        ALL_SIGNALS = ALL_SIGNALS_HISTORIC
+    
+    #signal_names = list(ALL_SIGNALS.keys())
     if (len(weights) != len(ALL_SIGNALS)):
         logging.error(f'There are {len(weights)} weights but {len(ALL_SIGNALS)} signals')
     else:
@@ -80,7 +94,7 @@ def objective(trial):
                                              normalization_ranges["step"]
                                              )
     all_trial_params = {}
-    for signal_name in ALL_SIGNALS.keys():
+    for signal_name in ALL_SIGNALS_TRAIN.keys():
         trial_param = trial.suggest_float(
                 name = signal_name,
                 low = WEIGHT_MIN,
@@ -88,7 +102,7 @@ def objective(trial):
                 step = WEIGHT_STEP
                 )
         all_trial_params[signal_name] = trial_param
-    signal = combination_of_signals(all_trial_params, normalization_choice)
+    signal = combination_of_signals(all_trial_params, normalization_choice, config = "training")
     metrics = compute_metrics(signal, returns)
     return metrics[metric_to_optimize]
 
@@ -138,10 +152,6 @@ def save_parameters(dict_of_parameters: dict):
         yaml.safe_dump(dict_of_parameters, outfile, default_flow_style=False)
 
 def optimize_combined_signal():
-    global ALL_SIGNALS
-    
-    #-- we keep the signals in the same order
-    ALL_SIGNALS = dict(sorted(collect_all_signals().items()))
     study = optuna.create_study(direction = optuna_study_direction)
     try:
         study.optimize(objective, n_trials = N_TRIALS, callbacks=[early_stopping_opt])
@@ -155,11 +165,21 @@ def optimize_combined_signal():
                                                 temp.items()}
     
     del temp["normalization_choice"]
-    signal = combination_of_signals(temp, normalization_choice)
-    metrics = compute_metrics(signal, returns)
-    if check_if_improvement(metrics):
+    signal_historic = combination_of_signals(temp, normalization_choice, config = "all")
+    
+    nb_rows = int(train_ratio * len(signal_historic))
+    metrics_train = compute_metrics(signal_historic[:nb_rows], returns)
+    metrics_test = compute_metrics(signal_historic[nb_rows:], returns)
+    
+    print(len(signal_historic[nb_rows:]))
+    print(max(signal_historic[:nb_rows].index))
+    print(min(signal_historic[nb_rows:].index))
+    print(metrics_test)
+    print(returns)
+    print(signal_historic[nb_rows:])
+    if check_if_improvement(metrics_train):
         logging.info("Signal has improved")
-        save_scores(metrics)
+        save_scores(metrics_train)
         save_parameters(best_params_dict)
     else:
         logging.info("Signal hasn't improved")
